@@ -1,0 +1,1485 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Christmas Countdown • Santa Tracker • Playlist • Gift Ideas</title>
+  <style>
+    :root{
+      --bg1:#050816;
+      --bg2:#0b1536;
+      --glass: rgba(255,255,255,0.10);
+      --glass2: rgba(255,255,255,0.06);
+      --stroke: rgba(255,255,255,0.16);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.68);
+      --good: rgba(136,255,210,0.95);
+      --warn: rgba(255,212,136,0.95);
+      --bad: rgba(255,136,170,0.95);
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 22px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{ box-sizing:border-box; }
+    html, body { height:100%; }
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: var(--sans);
+      overflow-x:hidden;
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(111,255,220,0.13), transparent 60%),
+        radial-gradient(900px 500px at 80% 20%, rgba(158,140,255,0.18), transparent 62%),
+        radial-gradient(1200px 900px at 50% 80%, rgba(75,150,255,0.10), transparent 65%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+
+    /* starfield */
+    .stars{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:.55;
+      background-image:
+        radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,.9), transparent 45%),
+        radial-gradient(1.5px 1.5px at 35% 70%, rgba(255,255,255,.8), transparent 45%),
+        radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,.7), transparent 45%),
+        radial-gradient(2px 2px at 88% 66%, rgba(255,255,255,.85), transparent 45%),
+        radial-gradient(1px 1px at 55% 45%, rgba(255,255,255,.65), transparent 45%),
+        radial-gradient(1.5px 1.5px at 25% 40%, rgba(255,255,255,.75), transparent 45%),
+        radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,.6), transparent 45%);
+      filter: drop-shadow(0 0 10px rgba(160,220,255,.18));
+      animation: twinkle 6s ease-in-out infinite alternate;
+      z-index:0;
+    }
+    @keyframes twinkle{
+      from{ opacity:.45; transform: translateY(0px); }
+      to{ opacity:.70; transform: translateY(-6px); }
+    }
+
+    /* aurora */
+    .aurora{
+      position:fixed; inset:-20% -10%;
+      pointer-events:none;
+      background:
+        conic-gradient(from 180deg at 50% 50%,
+          rgba(102,255,214,0.0),
+          rgba(102,255,214,0.10),
+          rgba(162,140,255,0.12),
+          rgba(102,170,255,0.10),
+          rgba(102,255,214,0.0));
+      filter: blur(44px) saturate(125%);
+      opacity:.75;
+      animation: drift 18s ease-in-out infinite alternate;
+      mix-blend-mode: screen;
+      z-index:1;
+      transform: translate3d(0,0,0);
+      will-change: transform;
+    }
+    @keyframes drift{
+      from{ transform: translate3d(-2%, -1%, 0) rotate(-6deg) scale(1.05); }
+      to{ transform: translate3d(2%, 1%, 0) rotate(6deg) scale(1.08); }
+    }
+
+    /* snow canvas */
+    canvas#snow{
+      position:fixed; inset:0;
+      pointer-events:none;
+      z-index:3;
+    }
+
+    /* Top nav */
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:9;
+      padding:14px 14px 0;
+      backdrop-filter: blur(10px);
+    }
+    .nav{
+      width:min(1160px, 100%);
+      margin: 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding: 10px 10px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 6px 10px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+    }
+    .brand .mark{
+      width:12px; height:12px; border-radius:50%;
+      background: var(--good);
+      box-shadow: 0 0 22px rgba(136,255,210,.45);
+    }
+    .brand b{ letter-spacing:0.02em; }
+    .tabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .tab{
+      appearance:none;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.86);
+      padding:10px 12px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight:700;
+      letter-spacing:0.01em;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .tab:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.22); }
+    .tab.active{ background: rgba(136,255,210,0.12); border-color: rgba(136,255,210,0.32); color: rgba(255,255,255,0.95); }
+
+    /* Layout */
+    .wrap{
+      position:relative;
+      z-index:4;
+      min-height: calc(100% - 68px);
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding: 18px 18px 56px;
+    }
+
+    .panel{
+      width:min(1160px, 100%);
+      display:grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap:18px;
+    }
+    @media (max-width: 940px){
+      .panel{ grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .card{
+      position:relative;
+      background: linear-gradient(180deg, var(--glass), var(--glass2));
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(600px 260px at 20% 0%, rgba(255,255,255,0.11), transparent 60%);
+      pointer-events:none;
+    }
+
+    /* cursor-follow glow */
+    .glow{
+      position:absolute;
+      inset:-120px;
+      pointer-events:none;
+      opacity:.55;
+      background: radial-gradient(220px 220px at var(--mx, 20%) var(--my, 20%),
+        rgba(136,255,210,0.18),
+        rgba(160,140,255,0.14),
+        transparent 60%);
+      filter: blur(8px);
+      transform: translateZ(1px);
+    }
+
+    header.hero{
+      padding:22px 22px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      transform: translateZ(10px);
+    }
+    .title{
+      font-size: clamp(26px, 3.4vw, 44px);
+      line-height:1.05;
+      margin:0 0 10px;
+      letter-spacing:-0.02em;
+      text-shadow: 0 10px 40px rgba(0,0,0,.35);
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size: 14.5px;
+      max-width: 70ch;
+    }
+
+    .shimmer{
+      background: linear-gradient(90deg,
+        rgba(255,255,255,.88),
+        rgba(140,220,255,.92),
+        rgba(170,140,255,.92),
+        rgba(255,255,255,.88));
+      background-size: 220% 100%;
+      -webkit-background-clip:text;
+      background-clip:text;
+      color: transparent;
+      animation: shimmer 5.5s ease-in-out infinite;
+    }
+    @keyframes shimmer{
+      0%{ background-position: 0% 50%; }
+      50%{ background-position: 100% 50%; }
+      100%{ background-position: 0% 50%; }
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:12px;
+      padding:18px 22px 22px;
+      transform: translateZ(8px);
+    }
+    @media (max-width: 700px){
+      .grid{ grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .tile{
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      padding:14px 14px 12px;
+      background: rgba(0,0,0,0.12);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .tile .num{
+      font-family: var(--mono);
+      font-size: clamp(24px, 4.2vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin:0;
+    }
+    .tile .lbl{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      padding: 0 22px 22px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      transform: translateZ(8px);
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.14);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .dot{
+      width:10px; height:10px;
+      border-radius:50%;
+      background: var(--good);
+      box-shadow: 0 0 20px rgba(136,255,210,.45);
+    }
+
+    .btns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    button, input[type="range"], input[type="text"]{
+      font: inherit;
+    }
+    button{
+      appearance:none;
+      border:1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      padding:10px 12px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight:800;
+      letter-spacing:0.01em;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    button:hover{ transform: translateY(-1px); background: rgba(0,0,0,0.24); border-color: rgba(255,255,255,0.24); }
+    button:active{ transform: translateY(0px); }
+    .smallbtn{ padding:9px 10px; font-weight:800; }
+
+    .controls{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .range{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.14);
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+    input[type="range"]{
+      width: 120px;
+      accent-color: rgba(136,255,210,0.95);
+    }
+
+    /* Right card tracker */
+    .tracker{
+      padding: 18px 18px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .miniTitle{
+      margin: 6px 4px 0;
+      font-size: 15px;
+      letter-spacing:0.14em;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.82);
+      transform: translateZ(10px);
+    }
+
+    .map{
+      position:relative;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:
+        radial-gradient(700px 220px at 25% 20%, rgba(120,255,210,0.14), transparent 55%),
+        radial-gradient(700px 220px at 80% 80%, rgba(160,140,255,0.16), transparent 55%),
+        linear-gradient(180deg, rgba(0,0,0,0.24), rgba(0,0,0,0.12));
+      height: 260px;
+      overflow:hidden;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+      transform: translateZ(8px);
+    }
+    .gridlines{
+      position:absolute; inset:-40%;
+      opacity:.35;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: 36px 36px;
+      transform: rotate(10deg);
+    }
+    .pin{
+      position:absolute;
+      width:12px; height:12px;
+      border-radius:50%;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 0 0 8px rgba(255,255,255,0.08), 0 0 30px rgba(140,220,255,.25);
+      z-index:4;
+    }
+    .pin.you{
+      background: rgba(136,255,210,.95);
+      box-shadow: 0 0 0 8px rgba(136,255,210,0.12), 0 0 30px rgba(136,255,210,.25);
+    }
+    .path{
+      position:absolute; inset:0;
+      opacity:.95;
+      z-index:2;
+    }
+
+    .sleigh{
+      position:absolute;
+      left: -20%;
+      top: 45%;
+      width: 200px;
+      height: 40px;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,.35));
+      opacity: .95;
+      z-index:3;
+      transform: translate3d(0,0,0);
+      will-change: transform, left, top;
+    }
+    .sleigh svg{ width:100%; height:100%; }
+
+    .info{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+      padding: 10px 12px 12px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.16);
+      transform: translateZ(8px);
+    }
+    .kv{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .kv b{
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .bigETA{
+      margin-top: 2px;
+      padding: 14px 12px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      transform: translateZ(8px);
+    }
+    .bigETA .label{
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing:0.14em;
+      text-transform:uppercase;
+      margin-bottom: 8px;
+    }
+    .bigETA .value{
+      font-family: var(--mono);
+      font-weight: 900;
+      font-size: 26px;
+      letter-spacing:-0.02em;
+    }
+
+    .footerNote{
+      color: rgba(255,255,255,0.52);
+      font-size: 12px;
+      padding: 0 4px 2px;
+      line-height:1.4;
+      transform: translateZ(8px);
+    }
+
+    /* Pages */
+    .page{ display:none; }
+    .page.active{ display:block; }
+
+    /* Playlist + Gift ideas cards */
+    .full{
+      width:min(1160px, 100%);
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:18px;
+    }
+
+    .section{
+      padding: 18px 22px 22px;
+      transform: translateZ(8px);
+    }
+
+    .h2{
+      margin: 0 0 10px;
+      font-size: 20px;
+      letter-spacing:-0.01em;
+    }
+    .muted{
+      color: var(--muted);
+      margin: 0 0 14px;
+      line-height:1.5;
+    }
+
+    .list{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    @media (max-width: 900px){
+      .list{ grid-template-columns: 1fr; }
+    }
+    .item{
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      background: rgba(0,0,0,0.12);
+      padding: 14px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .item b{ display:block; margin-bottom:6px; }
+    .item a{ color: rgba(140,220,255,.95); text-decoration: none; }
+    .item a:hover{ text-decoration: underline; }
+
+    .filters{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin: 12px 0 10px;
+    }
+    .search{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    input[type="text"]{
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.14);
+      color: rgba(255,255,255,0.92);
+      width: min(360px, 100%);
+      outline:none;
+    }
+    select{
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.14);
+      color: rgba(255,255,255,0.92);
+      outline:none;
+    }
+
+    /* Toast */
+    .toast{
+      position: fixed;
+      z-index: 999;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      padding: 10px 12px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      color: rgba(255,255,255,.86);
+      font-size: 13px;
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .toast.show{
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="stars"></div>
+  <div class="aurora" id="aurora"></div>
+  <canvas id="snow"></canvas>
+
+  <div class="topbar">
+    <div class="nav">
+      <div class="brand">
+        <div class="mark"></div>
+        <b>Christmas HQ</b>
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-page="tracker">Tracker</button>
+        <button class="tab" data-page="playlist">Playlist</button>
+        <button class="tab" data-page="gifts">Gift Ideas</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <!-- PAGE: TRACKER -->
+    <div class="page active" id="page-tracker">
+      <div class="panel">
+        <!-- LEFT: Countdown + Controls -->
+        <section class="card parallax">
+          <div class="glow"></div>
+
+          <header class="hero">
+            <h1 class="title shimmer">Christmas Countdown</h1>
+            <p class="subtitle">
+              Countdown is real. Santa tracking tries a live route feed when available, otherwise falls back to an offline “for fun” tracker.
+            </p>
+          </header>
+
+          <div class="grid" aria-label="Countdown">
+            <div class="tile">
+              <p class="num" id="d">--</p>
+              <p class="lbl">Days</p>
+            </div>
+            <div class="tile">
+              <p class="num" id="h">--</p>
+              <p class="lbl">Hours</p>
+            </div>
+            <div class="tile">
+              <p class="num" id="m">--</p>
+              <p class="lbl">Minutes</p>
+            </div>
+            <div class="tile">
+              <p class="num" id="s">--</p>
+              <p class="lbl">Seconds</p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="pill" title="Tracker feed status">
+              <span class="dot" id="statusDot"></span>
+              <span id="statusText">Loading Santa feed…</span>
+            </div>
+
+            <div class="btns">
+              <button id="btnSnow" class="smallbtn">Toggle Snow</button>
+              <button id="btnBoost" class="smallbtn">Boost Effects</button>
+              <button id="btnMusic" class="smallbtn">Music: Off</button>
+              <div class="range" title="Music volume">
+                <span>Vol</span>
+                <input id="vol" type="range" min="0" max="100" value="35" />
+              </div>
+              <button id="btnShare" class="smallbtn">Copy Share Text</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- RIGHT: Santa tracker -->
+        <aside class="card tracker parallax">
+          <div class="glow"></div>
+
+          <div class="miniTitle shimmer">Santa Tracker</div>
+
+          <div class="map" aria-label="Santa map">
+            <div class="gridlines"></div>
+
+            <!-- SVG path overlay -->
+            <svg class="path" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <path id="routePath" d="M5,60 C20,35 35,35 50,52 C65,70 80,75 95,55"
+                    fill="none" stroke="rgba(255,255,255,0.26)" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M20,65 C35,52 50,50 60,56" fill="none" stroke="rgba(136,255,210,0.40)" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+
+            <div class="pin" id="pinSanta" title="Santa"></div>
+            <div class="pin you" id="pinYou" title="You"></div>
+
+            <div class="sleigh" id="sleigh">
+              <svg viewBox="0 0 640 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M120 78 C180 40, 260 40, 320 66 C380 92, 460 98, 540 72" stroke="rgba(255,255,255,0.35)" stroke-width="4" stroke-linecap="round"/>
+                <path d="M220 78 C260 58, 320 56, 360 70" stroke="rgba(136,255,210,0.50)" stroke-width="4" stroke-linecap="round"/>
+                <g>
+                  <path d="M420 70 C430 42, 480 42, 490 70 C495 88, 415 88, 420 70Z" fill="rgba(255,255,255,0.92)"/>
+                  <path d="M420 70 C430 44, 480 44, 490 70" stroke="rgba(0,0,0,0.20)" stroke-width="4" stroke-linecap="round"/>
+                  <rect x="455" y="40" width="16" height="18" rx="6" fill="rgba(255,136,170,0.85)"/>
+                  <path d="M497 74 C520 80, 535 78, 560 70" stroke="rgba(255,212,136,0.70)" stroke-width="4" stroke-linecap="round"/>
+                  <circle cx="505" cy="64" r="7" fill="rgba(255,255,255,0.86)"/>
+                  <circle cx="525" cy="60" r="5" fill="rgba(255,255,255,0.70)"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          <div class="info">
+            <div class="kv"><span>Feed mode</span><b id="mode">—</b></div>
+            <div class="kv"><span>Santa’s current location</span><b id="loc">—</b></div>
+            <div class="kv"><span>Estimated speed</span><b id="spd">—</b></div>
+            <div class="kv"><span>Distance to you</span><b id="dist">—</b></div>
+            <div class="kv"><span>Next stop</span><b id="next">—</b></div>
+          </div>
+
+          <div class="bigETA">
+            <div class="label">Estimated time to your house</div>
+            <div class="value" id="eta">—</div>
+          </div>
+
+          <div class="footerNote" id="footnote">
+            If live Santa data can’t be fetched (CORS/offline), it automatically switches to a visual “for fun” route.
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- PAGE: PLAYLIST -->
+    <div class="page" id="page-playlist">
+      <div class="full">
+        <section class="card parallax">
+          <div class="glow"></div>
+          <header class="hero">
+            <h1 class="title shimmer">Christmas Playlist</h1>
+            <p class="subtitle">Click any track to open it. You can swap these links for Spotify/YouTube/Apple Music.</p>
+          </header>
+
+          <div class="section">
+            <div class="filters">
+              <div class="controls">
+                <button id="btnShuffle" class="smallbtn">Shuffle</button>
+                <button id="btnCopyPlaylist" class="smallbtn">Copy Playlist</button>
+              </div>
+              <div class="pill"><span class="dot"></span><span>Tip: Use your browser’s “Open link in new tab”</span></div>
+            </div>
+
+            <div class="list" id="playlistList"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- PAGE: GIFTS -->
+    <div class="page" id="page-gifts">
+      <div class="full">
+        <section class="card parallax">
+          <div class="glow"></div>
+          <header class="hero">
+            <h1 class="title shimmer">Gift Ideas</h1>
+            <p class="subtitle">Search + filter. These are general ideas with quick links you can replace with any shop you like.</p>
+          </header>
+
+          <div class="section">
+            <div class="filters">
+              <div class="search">
+                <input id="giftSearch" type="text" placeholder="Search gifts (e.g., headphones, books, gaming)..." />
+                <select id="giftFilter">
+                  <option value="all">All</option>
+                  <option value="music">Music</option>
+                  <option value="tech">Tech</option>
+                  <option value="gaming">Gaming</option>
+                  <option value="cozy">Cozy</option>
+                  <option value="creative">Creative</option>
+                </select>
+              </div>
+              <div class="controls">
+                <button id="btnGiftReset" class="smallbtn">Reset</button>
+                <button id="btnCopyGifts" class="smallbtn">Copy Visible</button>
+              </div>
+            </div>
+
+            <div class="list" id="giftList"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast">Copied.</div>
+
+  <script>
+    // ---------------------------
+    // Helpers
+    // ---------------------------
+    const $ = (id) => document.getElementById(id);
+
+    function pad2(n){ return String(n).padStart(2, "0"); }
+
+    function showToast(text){
+      const t = $("toast");
+      t.textContent = text;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 1400);
+    }
+
+    function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+    // ---------------------------
+    // Tabs (multi-page)
+    // ---------------------------
+    const tabs = Array.from(document.querySelectorAll(".tab"));
+    const pages = {
+      tracker: $("page-tracker"),
+      playlist: $("page-playlist"),
+      gifts: $("page-gifts")
+    };
+
+    function go(page){
+      for(const k of Object.keys(pages)){
+        pages[k].classList.toggle("active", k === page);
+      }
+      tabs.forEach(t => t.classList.toggle("active", t.dataset.page === page));
+      location.hash = page;
+      window.scrollTo({ top:0, behavior:"smooth" });
+    }
+
+    tabs.forEach(t => t.addEventListener("click", () => go(t.dataset.page)));
+
+    // initial
+    const initial = (location.hash || "#tracker").replace("#","");
+    if(pages[initial]) go(initial);
+
+    // ---------------------------
+    // Countdown (to next Dec 25 00:00 local time)
+    // ---------------------------
+    function nextChristmasMidnight(){
+      const now = new Date();
+      const year = now.getFullYear();
+      const xmasThisYear = new Date(year, 11, 25, 0, 0, 0, 0);
+      if(now <= xmasThisYear) return xmasThisYear;
+      return new Date(year + 1, 11, 25, 0, 0, 0, 0);
+    }
+
+    let target = nextChristmasMidnight();
+
+    function updateCountdown(){
+      const now = new Date();
+      let ms = target - now;
+
+      if(ms <= 0){
+        $("d").textContent = "00";
+        $("h").textContent = "00";
+        $("m").textContent = "00";
+        $("s").textContent = "00";
+        return;
+      }
+
+      const sec = Math.floor(ms / 1000);
+      const days = Math.floor(sec / 86400);
+      const hrs = Math.floor((sec % 86400) / 3600);
+      const mins = Math.floor((sec % 3600) / 60);
+      const secs = sec % 60;
+
+      $("d").textContent = pad2(days);
+      $("h").textContent = pad2(hrs);
+      $("m").textContent = pad2(mins);
+      $("s").textContent = pad2(secs);
+    }
+
+    setInterval(updateCountdown, 250);
+    updateCountdown();
+
+    // ---------------------------
+    // Snow (canvas)
+    // ---------------------------
+    const canvas = $("snow");
+    const ctx = canvas.getContext("2d");
+    let snowEnabled = true;
+    let boost = false;
+
+    function resize(){
+      canvas.width  = Math.floor(window.innerWidth * devicePixelRatio);
+      canvas.height = Math.floor(window.innerHeight * devicePixelRatio);
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
+      ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+      makeFlakes();
+    }
+    window.addEventListener("resize", resize);
+
+    const flakes = [];
+    function rand(min,max){ return Math.random()*(max-min)+min; }
+
+    function makeFlakes(){
+      flakes.length = 0;
+      const count = Math.floor((window.innerWidth * window.innerHeight) / (boost ? 8200 : 14000));
+      for(let i=0;i<count;i++){
+        flakes.push({
+          x: rand(0, window.innerWidth),
+          y: rand(0, window.innerHeight),
+          r: rand(0.8, boost ? 3.6 : 2.6),
+          s: rand(boost ? 1.0 : 0.6, boost ? 3.2 : 1.8),
+          w: rand(-0.8, 0.8),
+          a: rand(0.22, 0.88)
+        });
+      }
+    }
+
+    function stepSnow(){
+      if(!snowEnabled){
+        ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+        requestAnimationFrame(stepSnow);
+        return;
+      }
+
+      ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+
+      for(const f of flakes){
+        f.y += f.s;
+        f.x += f.w + Math.sin((f.y/80)) * (boost ? 1.15 : 0.7);
+
+        if(f.y > window.innerHeight + 10){
+          f.y = -10;
+          f.x = rand(0, window.innerWidth);
+        }
+        if(f.x < -20) f.x = window.innerWidth + 20;
+        if(f.x > window.innerWidth + 20) f.x = -20;
+
+        ctx.globalAlpha = f.a;
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.r, 0, Math.PI*2);
+        ctx.fillStyle = "white";
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(stepSnow);
+    }
+
+    resize();
+    stepSnow();
+
+    $("btnSnow").addEventListener("click", () => {
+      snowEnabled = !snowEnabled;
+      showToast(snowEnabled ? "Snow enabled." : "Snow disabled.");
+    });
+
+    $("btnBoost").addEventListener("click", () => {
+      boost = !boost;
+      makeFlakes();
+      showToast(boost ? "Effects boosted." : "Effects normal.");
+    });
+
+    // ---------------------------
+    // 3D Parallax + mouse glow
+    // ---------------------------
+    const parallaxCards = Array.from(document.querySelectorAll(".parallax"));
+    let lastX = 0.5, lastY = 0.5;
+
+    function applyParallax(){
+      const maxTilt = 8;
+      for(const card of parallaxCards){
+        const rect = card.getBoundingClientRect();
+        const cx = rect.left + rect.width/2;
+        const cy = rect.top + rect.height/2;
+        const dx = (lastX - cx) / rect.width;
+        const dy = (lastY - cy) / rect.height;
+        const rx = clamp(dy * -maxTilt, -maxTilt, maxTilt);
+        const ry = clamp(dx *  maxTilt, -maxTilt, maxTilt);
+
+        card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
+        const mx = clamp(((lastX - rect.left) / rect.width) * 100, 0, 100);
+        const my = clamp(((lastY - rect.top) / rect.height) * 100, 0, 100);
+        card.style.setProperty("--mx", mx + "%");
+        card.style.setProperty("--my", my + "%");
+      }
+
+      // also gently steer aurora
+      const a = $("aurora");
+      if(a){
+        const ax = (lastX / window.innerWidth - 0.5) * 2;
+        const ay = (lastY / window.innerHeight - 0.5) * 2;
+        a.style.transform = `translate3d(${ax*1.8}%, ${ay*1.2}%, 0) rotate(${ax*2}deg) scale(1.06)`;
+      }
+
+      requestAnimationFrame(applyParallax);
+    }
+
+    window.addEventListener("mousemove", (e) => {
+      lastX = e.clientX;
+      lastY = e.clientY;
+    });
+    // mobile: use touch
+    window.addEventListener("touchmove", (e) => {
+      if(!e.touches?.length) return;
+      lastX = e.touches[0].clientX;
+      lastY = e.touches[0].clientY;
+    }, { passive:true });
+
+    // start in center
+    lastX = window.innerWidth * 0.5;
+    lastY = window.innerHeight * 0.35;
+    requestAnimationFrame(applyParallax);
+
+    // ---------------------------
+    // Santa tracker: try live feeds, fallback to offline
+    //
+    // Live option A (route JSON on Google storage): widely referenced as a route feed.
+    // Live option B (older santa-api style endpoint): sometimes works; may be blocked by CORS.
+    //
+    // If either fails, we run a fully offline “for fun” route.
+    // ---------------------------
+    let you = { lat: 51.5074, lon: -0.1278, name: "Your Area" };
+
+    function haversineKm(a, b){
+      const R = 6371;
+      const toRad = (x) => x * Math.PI / 180;
+      const dLat = toRad(b.lat - a.lat);
+      const dLon = toRad(b.lon - a.lon);
+      const lat1 = toRad(a.lat);
+      const lat2 = toRad(b.lat);
+      const s = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+      return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
+    }
+    function formatKm(km){
+      if(!isFinite(km)) return "—";
+      if(km < 10) return `${km.toFixed(1)} km`;
+      if(km < 1000) return `${Math.round(km)} km`;
+      return `${(km/1000).toFixed(2)}k km`;
+    }
+    function formatETA(minutes){
+      if(!isFinite(minutes)) return "—";
+      if(minutes < 1) return "Any moment now…";
+      const h = Math.floor(minutes / 60);
+      const m = Math.round(minutes % 60);
+      if(h <= 0) return `${m} min`;
+      return `${h} hr ${m} min`;
+    }
+    function setPin(el, x, y){
+      el.style.left = `calc(${x}% - 6px)`;
+      el.style.top  = `calc(${y}% - 6px)`;
+    }
+
+    // OFFLINE fallback route nodes (purely for visuals)
+    const offlineNodes = [
+      { name: "North Pole", lat: 90.0, lon: 0.0 },
+      { name: "Reykjavík Airspace", lat: 64.1466, lon: -21.9426 },
+      { name: "Atlantic Jetstream", lat: 55.0, lon: -30.0 },
+      { name: "UK Approach", lat: 54.0, lon: -2.0 },
+      { name: "Local Skies", lat: 51.5, lon: -0.1 }
+    ];
+
+    function lerp(a,b,t){ return a + (b-a)*t; }
+
+    function offlineProgress(){
+      const now = new Date();
+      const t = (now.getTime() / 1000) % 90;
+      return t / 90;
+    }
+    function offlineInterpolated(p){
+      const n = offlineNodes.length - 1;
+      const scaled = p * n;
+      const i = Math.floor(scaled);
+      const f = scaled - i;
+      const A = offlineNodes[Math.min(i, n)];
+      const B = offlineNodes[Math.min(i+1, n)];
+      return {
+        lat: lerp(A.lat, B.lat, f),
+        lon: lerp(A.lon, B.lon, f),
+        name: (f < 0.5 ? A.name : B.name),
+        next: offlineNodes[Math.min(i+1, n)].name
+      };
+    }
+
+    // LIVE route data (best effort):
+    // A) https://storage.googleapis.com/santa/route-v1/santa_en.json (undocumented route feed)
+    // B) https://santa-api.appspot.com/info?... (older style referenced by dev writeups)
+    //
+    // These endpoints may change or be blocked by CORS. If so, fallback runs.
+    let feedMode = "Loading…";
+    let liveRoute = null;       // array of stops (best effort)
+    let liveIndex = 0;
+    let lastLiveFetchMs = 0;
+
+    async function fetchJson(url){
+      const res = await fetch(url, { cache:"no-store" });
+      if(!res.ok) throw new Error("HTTP " + res.status);
+      return await res.json();
+    }
+
+    function setFeedStatus(ok, text){
+      $("statusDot").style.background = ok ? "rgba(136,255,210,0.95)" : "rgba(255,136,170,0.95)";
+      $("statusText").textContent = text;
+    }
+
+    function parseGoogleRoute(json){
+      // Route JSON formats have varied over the years; we handle a few common shapes.
+      // We aim to return a list of stops with: {lat, lng/lon, city/region/name, arrival/departure timestamps if present}
+      const stops = [];
+
+      // common: { destinations: [ { location:{ lat,lng }, city, region, arrival, departure, ... } ] }
+      if(json?.destinations && Array.isArray(json.destinations)){
+        for(const d of json.destinations){
+          const lat = d?.location?.lat ?? d?.lat;
+          const lon = d?.location?.lng ?? d?.location?.lon ?? d?.lng ?? d?.lon;
+          const name = d?.city || d?.name || d?.region || "Stop";
+          const arrival = d?.arrival || d?.arrivalTime || d?.arrival_time;
+          const departure = d?.departure || d?.departureTime || d?.departure_time;
+          if(isFinite(lat) && isFinite(lon)){
+            stops.push({ lat:+lat, lon:+lon, name, arrival, departure });
+          }
+        }
+      }
+
+      // sometimes: { route: [ { lat, lng, ... } ] }
+      if(stops.length === 0 && Array.isArray(json?.route)){
+        for(const d of json.route){
+          const lat = d?.lat;
+          const lon = d?.lng ?? d?.lon;
+          const name = d?.city || d?.name || d?.region || "Stop";
+          if(isFinite(lat) && isFinite(lon)){
+            stops.push({ lat:+lat, lon:+lon, name, arrival:d?.arrival, departure:d?.departure });
+          }
+        }
+      }
+
+      return stops.length ? stops : null;
+    }
+
+    function pickNearestSegment(stops, nowMs){
+      // If arrivals are timestamps, choose the latest stop with arrival<=now, else just cycle.
+      // Many feeds use ms since epoch. If not, fallback to cycling.
+      const withTimes = stops.some(s => typeof s.arrival === "number" || typeof s.arrival === "string");
+      if(!withTimes) return 0;
+
+      const toMs = (v) => {
+        if(typeof v === "number") return v;
+        if(typeof v === "string"){
+          // if string is numeric
+          const n = Number(v);
+          if(Number.isFinite(n)) return n;
+        }
+        return NaN;
+      };
+
+      let best = 0;
+      let bestArr = -Infinity;
+
+      for(let i=0;i<stops.length;i++){
+        const a = toMs(stops[i].arrival);
+        if(Number.isFinite(a) && a <= nowMs && a > bestArr){
+          bestArr = a;
+          best = i;
+        }
+      }
+      return best;
+    }
+
+    async function tryLoadLiveSanta(){
+      // Try route JSON first
+      try{
+        // Undocumented feed referenced by multiple dev writeups; may be blocked by CORS or changed.
+        const j = await fetchJson("https://storage.googleapis.com/santa/route-v1/santa_en.json");
+        const parsed = parseGoogleRoute(j);
+        if(parsed && parsed.length >= 3){
+          liveRoute = parsed;
+          liveIndex = pickNearestSegment(liveRoute, Date.now());
+          feedMode = "Live route feed";
+          lastLiveFetchMs = Date.now();
+          setFeedStatus(true, "Live Santa feed connected.");
+          return true;
+        }
+      }catch(e){
+        // ignore and try next
+      }
+
+      // Try older info endpoint
+      try{
+        const j2 = await fetchJson("https://santa-api.appspot.com/info?client=web&language=en&fingerprint=&routeOffset=0&streamOffset=0");
+        // this endpoint format varies; attempt to derive a route
+        const parsed2 = parseGoogleRoute(j2);
+        if(parsed2 && parsed2.length >= 3){
+          liveRoute = parsed2;
+          liveIndex = pickNearestSegment(liveRoute, Date.now());
+          feedMode = "Live API feed";
+          lastLiveFetchMs = Date.now();
+          setFeedStatus(true, "Live Santa feed connected.");
+          return true;
+        }
+        // Sometimes it returns a current location object; handle that minimally
+        if(j2?.location?.lat && (j2?.location?.lng || j2?.location?.lon)){
+          liveRoute = [{ lat:+j2.location.lat, lon:+(j2.location.lng ?? j2.location.lon), name: j2?.location?.name || "Santa (Live)" }];
+          liveIndex = 0;
+          feedMode = "Live current position";
+          lastLiveFetchMs = Date.now();
+          setFeedStatus(true, "Live Santa position connected.");
+          return true;
+        }
+      }catch(e){
+        // ignore
+      }
+
+      // fallback
+      liveRoute = null;
+      feedMode = "Offline visual tracker";
+      setFeedStatus(false, "Live feed blocked/offline — using fun tracker.");
+      return false;
+    }
+
+    // set your location (optional)
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          you.lat = pos.coords.latitude;
+          you.lon = pos.coords.longitude;
+          you.name = "Your Location";
+        },
+        () => {},
+        { enableHighAccuracy:false, timeout: 2500, maximumAge: 60_000 }
+      );
+    }
+
+    // Visual + metrics update loop
+    function updateTrackerFromPosition(santa, nextName){
+      const speed = 9000 + 4500 * (0.5 + 0.5 * Math.sin((Date.now()/1000) * 0.7)); // vibe speed
+      const distKm = haversineKm({lat:santa.lat, lon:santa.lon}, {lat:you.lat, lon:you.lon});
+      const etaMinutes = Math.max(0, (distKm / speed) * 60);
+
+      $("mode").textContent = feedMode;
+      $("loc").textContent  = santa.name || "—";
+      $("spd").textContent  = `${Math.round(speed).toLocaleString()} km/h`;
+      $("dist").textContent = formatKm(distKm);
+      $("next").textContent = nextName || "—";
+      $("eta").textContent  = formatETA(etaMinutes);
+
+      // decorative positions (not true projection)
+      const p = (feedMode.startsWith("Live") && liveRoute && liveRoute.length>1)
+        ? (liveIndex / (liveRoute.length-1))
+        : offlineProgress();
+
+      const sx = 10 + p * 80;
+      const sy = 20 + 35 * (0.5 + 0.5 * Math.sin(p * Math.PI * 2));
+      setPin($("pinSanta"), sx, sy);
+
+      const yx = 78 + 1.5 * Math.sin(p * Math.PI * 4);
+      const yy = 72 + 1.5 * Math.cos(p * Math.PI * 3);
+      setPin($("pinYou"), yx, yy);
+
+      const sleigh = $("sleigh");
+      const x = -25 + p * 140;
+      const y = 48 + 10 * Math.sin(p * Math.PI * 2);
+      sleigh.style.left = `${x}%`;
+      sleigh.style.top  = `${y}%`;
+      sleigh.style.transform = `rotate(${(-6 + 10*Math.sin(p*Math.PI*2))}deg)`;
+    }
+
+    function stepTracker(){
+      // If live route exists, smoothly step through stops
+      if(liveRoute && liveRoute.length){
+        // refresh live feed occasionally (best effort)
+        if(Date.now() - lastLiveFetchMs > 120000){
+          tryLoadLiveSanta(); // no await
+        }
+
+        // advance index slowly for animation if no timestamps
+        const hasArrivalMs = liveRoute.some(s => Number.isFinite(Number(s.arrival)));
+        if(hasArrivalMs){
+          liveIndex = pickNearestSegment(liveRoute, Date.now());
+        }else{
+          const t = (Date.now()/1000) % (liveRoute.length * 3.5);
+          liveIndex = Math.floor(t / 3.5) % liveRoute.length;
+        }
+
+        const santa = liveRoute[liveIndex];
+        const next = liveRoute[Math.min(liveIndex+1, liveRoute.length-1)]?.name || "Next stop";
+        updateTrackerFromPosition(santa, next);
+      }else{
+        const p = offlineProgress();
+        const santa = offlineInterpolated(p);
+        updateTrackerFromPosition({ lat:santa.lat, lon:santa.lon, name:santa.name }, santa.next);
+      }
+
+      requestAnimationFrame(stepTracker);
+    }
+
+    // load live then start loop
+    tryLoadLiveSanta().then(() => {
+      $("footnote").textContent = feedMode.startsWith("Live")
+        ? "Live route loaded. If it drops (CORS/offline), it will switch back automatically."
+        : "Live feed blocked/offline — running the visual tracker for fun.";
+      stepTracker();
+    });
+
+    // Share text
+    $("btnShare").addEventListener("click", async () => {
+      const now = new Date();
+      const msg =
+`Christmas HQ
+Countdown target: ${target.toLocaleString()}
+Tracker mode: ${$("mode").textContent}
+Santa: ${$("loc").textContent}
+ETA: ${$("eta").textContent}
+Generated: ${now.toLocaleString()}`;
+      try{
+        await navigator.clipboard.writeText(msg);
+        showToast("Share text copied.");
+      }catch{
+        showToast("Clipboard blocked by browser.");
+      }
+    });
+
+    // ---------------------------
+    // Music toggle (WebAudio synth loop)
+    // - Starts only after a click (browser autoplay rules)
+    // ---------------------------
+    let audioCtx = null;
+    let master = null;
+    let musicOn = false;
+    let musicTimer = null;
+    let noteIdx = 0;
+
+    // Simple “jingle” melody (approx vibe, not a perfect transcription)
+    // Frequencies in Hz, duration in ms
+    const melody = [
+      [659.25, 220],[659.25, 220],[659.25, 420],
+      [659.25, 220],[659.25, 220],[659.25, 420],
+      [659.25, 220],[783.99, 220],[523.25, 220],[587.33, 220],[659.25, 520],
+      [698.46, 220],[698.46, 220],[698.46, 220],[698.46, 220],
+      [698.46, 220],[659.25, 220],[659.25, 220],[659.25, 220],
+      [659.25, 220],[587.33, 220],[587.33, 220],[659.25, 220],
+      [587.33, 420],[783.99, 420]
+    ];
+
+    function ensureAudio(){
+      if(audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      master = audioCtx.createGain();
+      master.gain.value = $("vol").value / 100;
+      master.connect(audioCtx.destination);
+    }
+
+    function playNote(freq, ms){
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = "triangle";
+      o.frequency.value = freq;
+
+      // envelope
+      const now = audioCtx.currentTime;
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(0.18, now + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + ms/1000);
+
+      o.connect(g);
+      g.connect(master);
+
+      o.start(now);
+      o.stop(now + ms/1000 + 0.02);
+    }
+
+    function loopMelody(){
+      if(!musicOn) return;
+      const [f, ms] = melody[noteIdx % melody.length];
+      noteIdx++;
+      playNote(f, ms);
+      musicTimer = setTimeout(loopMelody, ms + 20);
+    }
+
+    $("vol").addEventListener("input", () => {
+      if(master) master.gain.value = $("vol").value / 100;
+    });
+
+    $("btnMusic").addEventListener("click", async () => {
+      ensureAudio();
+      if(audioCtx.state === "suspended") await audioCtx.resume();
+
+      musicOn = !musicOn;
+      $("btnMusic").textContent = musicOn ? "Music: On" : "Music: Off";
+      showToast(musicOn ? "Music started." : "Music stopped.");
+
+      if(musicOn){
+        noteIdx = 0;
+        loopMelody();
+      }else{
+        if(musicTimer) clearTimeout(musicTimer);
+      }
+    });
+
+    // ---------------------------
+    // Playlist page
+    // ---------------------------
+    const playlist = [
+      { name: "Wham! — Last Christmas", link: "https://www.youtube.com/results?search_query=Wham+Last+Christmas" },
+      { name: "Mariah Carey — All I Want for Christmas Is You", link: "https://www.youtube.com/results?search_query=All+I+Want+for+Christmas+Is+You" },
+      { name: "The Pogues — Fairytale of New York", link: "https://www.youtube.com/results?search_query=Fairytale+of+New+York" },
+      { name: "Brenda Lee — Rockin' Around the Christmas Tree", link: "https://www.youtube.com/results?search_query=Rockin+Around+the+Christmas+Tree" },
+      { name: "Bing Crosby — White Christmas", link: "https://www.youtube.com/results?search_query=White+Christmas+Bing+Crosby" },
+      { name: "Andy Williams — It’s the Most Wonderful Time of the Year", link: "https://www.youtube.com/results?search_query=Most+Wonderful+Time+of+the+Year" },
+      { name: "Slade — Merry Xmas Everybody", link: "https://www.youtube.com/results?search_query=Slade+Merry+Xmas+Everybody" },
+      { name: "Wizzard — I Wish It Could Be Christmas Everyday", link: "https://www.youtube.com/results?search_query=Wizzard+Christmas+Everyday" },
+      { name: "Michael Bublé — It's Beginning to Look a Lot Like Christmas", link: "https://www.youtube.com/results?search_query=Beginning+to+Look+a+Lot+Like+Christmas+Buble" }
+    ];
+
+    function renderPlaylist(arr){
+      const el = $("playlistList");
+      el.innerHTML = "";
+      for(const t of arr){
+        const d = document.createElement("div");
+        d.className = "item";
+        d.innerHTML = `<b>${t.name}</b><a href="${t.link}" target="_blank" rel="noopener">Open</a>`;
+        el.appendChild(d);
+      }
+    }
+    renderPlaylist(playlist);
+
+    $("btnShuffle").addEventListener("click", () => {
+      const a = [...playlist];
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]] = [a[j],a[i]];
+      }
+      renderPlaylist(a);
+      showToast("Shuffled.");
+    });
+
+    $("btnCopyPlaylist").addEventListener("click", async () => {
+      const txt = playlist.map(p => `• ${p.name}`).join("\n");
+      try{
+        await navigator.clipboard.writeText(txt);
+        showToast("Playlist copied.");
+      }catch{
+        showToast("Clipboard blocked by browser.");
+      }
+    });
+
+    // ---------------------------
+    // Gift ideas page (search + filter)
+    // ---------------------------
+    const gifts = [
+      { cat:"music", title:"Budget headphones", desc:"Solid starter pair for music/gaming.", link:"https://www.amazon.co.uk/s?k=over+ear+headphones" },
+      { cat:"music", title:"Portable Bluetooth speaker", desc:"Small, loud, easy gift.", link:"https://www.amazon.co.uk/s?k=portable+bluetooth+speaker" },
+      { cat:"tech", title:"Power bank (fast charge)", desc:"Always useful, especially winter travel.", link:"https://www.amazon.co.uk/s?k=power+bank+fast+charge" },
+      { cat:"tech", title:"Smart LED strip lights", desc:"Room glow upgrade.", link:"https://www.amazon.co.uk/s?k=smart+led+strip" },
+      { cat:"gaming", title:"Game store gift card", desc:"Safe option when you’re unsure.", link:"https://www.google.com/search?q=gaming+gift+card" },
+      { cat:"gaming", title:"Controller charging dock", desc:"Neat desk setup upgrade.", link:"https://www.amazon.co.uk/s?k=controller+charging+dock" },
+      { cat:"cozy", title:"Weighted blanket", desc:"Cosy, calming, premium feel.", link:"https://www.amazon.co.uk/s?k=weighted+blanket" },
+      { cat:"cozy", title:"Hot chocolate set", desc:"Small gift, big vibe.", link:"https://www.amazon.co.uk/s?k=hot+chocolate+gift+set" },
+      { cat:"creative", title:"Sketchbook + fineliners", desc:"Low cost, high enjoyment.", link:"https://www.amazon.co.uk/s?k=sketchbook+fineliners" },
+      { cat:"creative", title:"LEGO-style set", desc:"Great for teens/adults.", link:"https://www.amazon.co.uk/s?k=lego+set" }
+    ];
+
+    function giftMatches(g, q, cat){
+      const okCat = (cat === "all") || (g.cat === cat);
+      const text = (g.title + " " + g.desc + " " + g.cat).toLowerCase();
+      const okQ = !q || text.includes(q.toLowerCase());
+      return okCat && okQ;
+    }
+
+    function renderGifts(){
+      const q = $("giftSearch").value.trim();
+      const cat = $("giftFilter").value;
+      const el = $("giftList");
+      el.innerHTML = "";
+      const visible = gifts.filter(g => giftMatches(g, q, cat));
+
+      for(const g of visible){
+        const d = document.createElement("div");
+        d.className = "item";
+        d.innerHTML = `<b>${g.title}</b>
+          <div class="muted" style="margin:0 0 10px; font-size:13px;">${g.desc}</div>
+          <a href="${g.link}" target="_blank" rel="noopener">Search / Shop</a>`;
+        el.appendChild(d);
+      }
+
+      if(visible.length === 0){
+        const d = document.createElement("div");
+        d.className = "item";
+        d.innerHTML = `<b>No matches</b><div class="muted" style="margin:0;">Try a different search or category.</div>`;
+        el.appendChild(d);
+      }
+    }
+
+    $("giftSearch").addEventListener("input", renderGifts);
+    $("giftFilter").addEventListener("change", renderGifts);
+
+    $("btnGiftReset").addEventListener("click", () => {
+      $("giftSearch").value = "";
+      $("giftFilter").value = "all";
+      renderGifts();
+      showToast("Reset.");
+    });
+
+    $("btnCopyGifts").addEventListener("click", async () => {
+      const q = $("giftSearch").value.trim();
+      const cat = $("giftFilter").value;
+      const visible = gifts.filter(g => giftMatches(g, q, cat));
+      const txt = visible.map(g => `• ${g.title} (${g.cat}) — ${g.desc}`).join("\n") || "No visible gifts.";
+      try{
+        await navigator.clipboard.writeText(txt);
+        showToast("Visible gifts copied.");
+      }catch{
+        showToast("Clipboard blocked by browser.");
+      }
+    });
+
+    renderGifts();
+  </script>
+</body>
+</html>
